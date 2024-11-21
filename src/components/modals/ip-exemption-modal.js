@@ -1,5 +1,5 @@
-const { ChannelType, ModalSubmitInteraction } = require('discord.js');
-const { EmbedBuilder, ButtonBuilder,ModalBuilder, ActionRowBuilder, TextInputStyle } = require('discord.js');
+const { ChannelType, ModalSubmitInteraction, ThreadAutoArchiveDuration } = require('discord.js');
+const { EmbedBuilder,ThreadManager, ButtonBuilder,ModalBuilder, ActionRowBuilder, TextInputStyle } = require('discord.js');
 const utils = require('../../utils.js')
 
 module.exports = {
@@ -37,7 +37,7 @@ module.exports = {
             .setTitle(`IP Exemption`)
 
 
-        let firstAccountName = utils.textInput('Account Name 1', 'acount-name-1', TextInputStyle.Short, true, 15);
+        let firstAccountName = utils.textInput('Account Name 1', 'account-name-1', TextInputStyle.Short, true, 15);
         let secondAccountName = utils.textInput('Account Name 2', 'account-name-2', TextInputStyle.Short, true, 20);
         let firstInGameName = utils.textInput('Character Name 1', 'character-name-1', TextInputStyle.Short, true, 20);
         let secondInGameName = utils.textInput('Character Name 2', 'character-name-2', TextInputStyle.Short, true, 20);
@@ -58,6 +58,22 @@ module.exports = {
         return modal;
     },
     run: async (client, interaction) => {
+        const forum = await client.channels.fetch('1308849865618624605');
+        const firstCharacterName = interaction.fields.getTextInputValue('character-name-1');
+        const secondCharacterName = interaction.fields.getTextInputValue('character-name-2');
+        const firstAccountName = interaction.fields.getTextInputValue('account-name-1');
+        const secondAccountName = interaction.fields.getTextInputValue('account-name-2');
+        const ipAddress = interaction.fields.getTextInputValue('ip-address');
+        const discordUsername = interaction?.member?.user?.username;
 
+        forum.threads.create({
+            name: discordUsername,
+            // 1 year auto archive
+            autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
+            message: {
+             content: `[Discord Username]: ${discordUsername}\n**[Account Name 1]** ${firstAccountName}\n**[Account Name 2]** ${secondAccountName}\n**[In-Game Name 1]** ${firstCharacterName}\n**[In-Game Name 2]** ${secondCharacterName}\n**[IP Address]** ${ipAddress}\nTODO: Add database bullshit for status, approval and dating`,
+            },
+            reason: 'IP Exemption',
+          })
     }
 }

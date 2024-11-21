@@ -21,15 +21,19 @@ module.exports = class extends Client {
         }
         this.deploySlashCommands = async () => {
             const rest = new REST().setToken(process.env.BOT_TOKEN);
-
-
+            console.log('Started loading application commands... (this might take minutes!)', 'warn');
+            // Dev Commands Deploy
             try {
-                console.log('Started loading application commands... (this might take minutes!)', 'warn');
-               await rest.put(Routes.applicationCommands(process.env.BOT_ID), { body: [] })
-                    .then(() => console.log('Successfully deleted all application commands.'))
-                    .catch(console.error);
+                let staleDevData = await rest.put(Routes.applicationGuildCommands(process.env.BOT_ID, "1302694166266118175"), {
+                    body: []
+                });
 
-                const data = await rest.put(Routes.applicationCommands(process.env.BOT_ID), {
+                console.log('Cleared Prior Commands..');
+            } catch (e) {
+                console.log('Unable to clear application commands to Discord API. error: %s', e);
+            };
+            try {
+                let newDevData = await rest.put(Routes.applicationGuildCommands(process.env.BOT_ID, "1302694166266118175"), {
                     body: this.deployArray
                 });
 
@@ -37,6 +41,26 @@ module.exports = class extends Client {
             } catch (e) {
                 console.log('Unable to load application commands to Discord API. error: %s', e);
             };
+            // Global Command deploy
+            try {
+                let staleDevData = await rest.put(Routes.applicationCommands(process.env.BOT_ID), {
+                    body: []
+                });
+
+                console.log('Cleared Prior Commands..');
+            } catch (e) {
+                console.log('Unable to clear application commands to Discord API. error: %s', e);
+            };
+            try {
+                let newDevData = await rest.put(Routes.applicationCommands(process.env.BOT_ID), {
+                    body: this.deployArray
+                });
+
+                console.log('Successfully loaded application commands to Discord API.', 'done');
+            } catch (e) {
+                console.log('Unable to load application commands to Discord API. error: %s', e);
+            };
+
         }
         this.loadCommands = () => {
             for (const type of readdirSync('./src/commands/')) {
