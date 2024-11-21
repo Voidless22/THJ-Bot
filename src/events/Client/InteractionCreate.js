@@ -8,6 +8,9 @@ module.exports = {
            2: select menu
            3: modal submit
         */
+
+
+
         switch (client.getInteractionType(interaction)) {
             case 0:
                 component = client.slashCommands.get(interaction.commandName);
@@ -19,7 +22,7 @@ module.exports = {
                 component = client.Components.selects.get(interaction.customId);
                 break;
             case 3:
-                component = client.Components.modals.get(interaction.customId);
+             component = client.Components.modals.get(interaction.customId);
                 break;
             default:
                 component = null;

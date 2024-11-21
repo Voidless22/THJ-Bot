@@ -1,5 +1,5 @@
 const { ChannelType, ModalSubmitInteraction, ThreadAutoArchiveDuration } = require('discord.js');
-const { EmbedBuilder,ThreadManager, ButtonBuilder,ModalBuilder, ActionRowBuilder, TextInputStyle } = require('discord.js');
+const { EmbedBuilder, ThreadManager, ButtonBuilder, ModalBuilder, ActionRowBuilder, TextInputStyle } = require('discord.js');
 const utils = require('../../utils.js')
 
 module.exports = {
@@ -71,9 +71,11 @@ module.exports = {
             // 1 year auto archive
             autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
             message: {
-             content: `[Discord Username]: ${discordUsername}\n**[Account Name 1]** ${firstAccountName}\n**[Account Name 2]** ${secondAccountName}\n**[In-Game Name 1]** ${firstCharacterName}\n**[In-Game Name 2]** ${secondCharacterName}\n**[IP Address]** ${ipAddress}\nTODO: Add database bullshit for status, approval and dating`,
+                content: `[Discord Username]: ${discordUsername}\n**[Account Name 1]** ${firstAccountName}\n**[Account Name 2]** ${secondAccountName}\n**[In-Game Name 1]** ${firstCharacterName}\n**[In-Game Name 2]** ${secondCharacterName}\n**[IP Address]** ${ipAddress}\nTODO: Add database bullshit for status, approval and dating`,
             },
             reason: 'IP Exemption',
-          })
+        })
+        await interaction.reply({ content: 'Form successfully submitted!', ephemeral: true });
+
     }
 }
