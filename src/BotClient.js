@@ -47,7 +47,7 @@ module.exports = class extends Client {
                     body: []
                 });
 
-                console.log('Cleared Prior Commands..');
+                console.log('Cleared Prior Commands from Global API..');
             } catch (e) {
                 console.log('Unable to clear application commands to Discord API. error: %s', e);
             };
@@ -56,9 +56,9 @@ module.exports = class extends Client {
                     body: this.deployArray
                 });
 
-                console.log('Successfully loaded application commands to Discord API.', 'done');
+                console.log('Successfully loaded application commands to Global Discord API.', 'done');
             } catch (e) {
-                console.log('Unable to load application commands to Discord API. error: %s', e);
+                console.log('Unable to load application commands to Global Discord API. error: %s', e);
             };
 
         }
@@ -72,7 +72,7 @@ module.exports = class extends Client {
                         continue;
                     } else {
                         this.slashCommands.set(module.structure.name, module);
-                        this.deployArray.set(module.structure.name, module.structure.toJSON());
+                        this.deployArray.set(module.structure.name, module.structure);
                         console.log("Loaded New Command [%s]", file);
                     }
 

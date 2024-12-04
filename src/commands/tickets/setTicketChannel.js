@@ -4,7 +4,7 @@ module.exports = {
     name: 'setticketchannel',
     structure: new SlashCommandBuilder()
         .setName('setticketchannel')
-        .setDescription('Sets the default channel for users to create tickets in.'),
+        .setDescription('Set up ticket creation and reception.'),
 
 
     run: async (client, interaction, args) => {
