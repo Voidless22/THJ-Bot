@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ChannelType, ActionRowBuilder, ButtonBuilder, ChannelSelectMenuBuilder, StringSelectMenuBuilder, ActionRow } = require('discord.js');
+const { SlashCommandBuilder, ChannelType, ActionRowBuilder, ButtonBuilder, PermissionsBitField, StringSelectMenuBuilder, ActionRow } = require('discord.js');
 const ticketUtils = require('../../ticketUtils');
 const SQLUtils = require('../../sqlUtils')
 module.exports = {
@@ -10,7 +10,11 @@ module.exports = {
 
 
     run: async (client, interaction, args) => {
-       
+        if (!interaction.member.permissions.has([PermissionsBitField.Flags.ManageChannels, PermissionsBitField.Flags.ManageRoles])) {
+            await interaction.reply('You need permission to manage channels and roles to use this command.');
+            return;
+        }
+
         let enableCategoryButton = new ButtonBuilder()
             .setCustomId('enable-category-button')
             .setLabel('Enable Category')
@@ -31,13 +35,13 @@ module.exports = {
             .setCustomId('preview-category-button')
             .setLabel('Preview Category')
             .setStyle(1);
-        let deleteCategoryButton = new ButtonBuilder()
-            .setCustomId('delete-category-button')
-            .setLabel('Delete Category')
-            .setStyle(4);
+        let setGuideRole = new ButtonBuilder()
+            .setCustomId('set-guide-role-button')
+            .setLabel('Set Guide Role')
+            .setStyle(3);
 
         const firstRow = new ActionRowBuilder().addComponents([enableCategoryButton, setCategoryChannelButton, sendCreateTicketButton]);
-        const secondRow = new ActionRowBuilder().addComponents([disableCategoryButton, previewCategoryButton, deleteCategoryButton]);
+        const secondRow = new ActionRowBuilder().addComponents([disableCategoryButton, previewCategoryButton, setGuideRole]);
 
         await interaction.reply({ components: [firstRow, secondRow] })
     }

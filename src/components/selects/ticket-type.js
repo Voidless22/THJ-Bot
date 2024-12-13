@@ -35,7 +35,7 @@ module.exports = {
                 }).then(async i => {
                     const date = new Date();
                     const threadName = `${i.user.username} | ${categoryData.general.name} | ${date.getMonth()}/${date.getDate()}/${date.getFullYear()}`
-                   let embedDescription = '';
+                    let embedDescription = '';
                     for (let index = 0; index < 6; index++) {
                         if (categoryData.input_data[index] != null) {
                             if (index === 0) {
@@ -49,7 +49,9 @@ module.exports = {
                     let ticketEmbed = await ticketUtils.genEmbed(threadName, embedDescription);
 
                     let ticketThread = await utils.createPetitionThread(threadName, categoryRecieveChannelID[0].ticket_recieve_channel, client)
-                    ticketThread.send({ content: `<@${i.user.id}>, <@&1317181808588095559> will be with you soon.`, embeds: [ticketEmbed] });
+                    let guideRoleID = await SQLUtils.SQLQuery('SELECT CAST(guide_role_id AS CHAR) AS guide_role_id FROM `General`');
+                    console.log(guideRoleID[0].guide_role_id)
+                    ticketThread.send({ content: `<@${i.user.id}>, <@&${guideRoleID[0].guide_role_id}> will be with you soon.`, embeds: [ticketEmbed] });
 
                     i.reply({ content: 'Submitted!', ephemeral: true })
                 }
@@ -83,7 +85,9 @@ module.exports = {
                     let ticketEmbed = await ticketUtils.genEmbed(threadName, embedDescription);
 
                     let ticketThread = await utils.createPetitionThread(threadName, categoryRecieveChannelID[0].ticket_recieve_channel, client)
-                    ticketThread.send({ content: `<@${i.user.id}>, <@&1317181808588095559> will be with you soon.`, embeds: [ticketEmbed] });
+                    let guideRoleID = await SQLUtils.SQLQuery('SELECT CAST(guide_role_id AS CHAR) AS guide_role_id FROM `General`');
+                    console.log(guideRoleID[0].guide_role_id)
+                    ticketThread.send({ content: `<@${i.user.id}>, <@&${guideRoleID[0].guide_role_id}> will be with you soon.`, embeds: [ticketEmbed] });
 
                     i.reply({ content: 'Submitted!', ephemeral: true })
                 }
