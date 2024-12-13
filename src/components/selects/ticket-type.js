@@ -34,12 +34,24 @@ module.exports = {
                     filter: k => k.user.id === i.user.id,
                 }).then(async i => {
                     const date = new Date();
-                    const threadName = `${i.user.username}-${categoryData.general.name}-${date.getMonth()}/${date.getDate()}/${date.getFullYear()}`
-                    const categoryChannel = client.channels.fetch(categoryRecieveChannelID[0].ticket_recieve_channel)
-                    let ticketThread = await utils.createPetitionThread(threadName, categoryRecieveChannelID[0].ticket_recieve_channel, client)
-                    ticketThread.send(`<@${i.user.id}>, <@&1317181808588095559> will be with you soon.`);
+                    const threadName = `${i.user.username} | ${categoryData.general.name} | ${date.getMonth()}/${date.getDate()}/${date.getFullYear()}`
+                   let embedDescription = '';
+                    for (let index = 0; index < 6; index++) {
+                        if (categoryData.input_data[index] != null) {
+                            if (index === 0) {
+                                embedDescription = `**${categoryData.input_data[index][0].name}**\n`;
+                            } else {
+                                embedDescription = embedDescription + `**${categoryData.input_data[index][0].name}**\n`;
+                            }
+                            embedDescription = embedDescription + i.fields.getTextInputValue(`modal-input-${index}`) + `\n`
+                        }
+                    }
+                    let ticketEmbed = await ticketUtils.genEmbed(threadName, embedDescription);
 
-                    i.reply({ content: 'Submitted!' })
+                    let ticketThread = await utils.createPetitionThread(threadName, categoryRecieveChannelID[0].ticket_recieve_channel, client)
+                    ticketThread.send({ content: `<@${i.user.id}>, <@&1317181808588095559> will be with you soon.`, embeds: [ticketEmbed] });
+
+                    i.reply({ content: 'Submitted!', ephemeral: true })
                 }
                 )
                     .catch(error => {
@@ -57,11 +69,23 @@ module.exports = {
                 .then(async i => {
                     const date = new Date();
                     const threadName = `${i.user.username}-${categoryData.general.name}-${date.getMonth()}/${date.getDate()}/${date.getFullYear()}`
-                    const categoryChannel = client.channels.fetch(categoryRecieveChannelID[0].ticket_recieve_channel)
-                    let ticketThread = await utils.createPetitionThread(threadName, categoryRecieveChannelID[0].ticket_recieve_channel, client)
-                    ticketThread.send(`<@${i.user.id}>, <@&1317181808588095559> will be with you soon.`);
+                    let embedDescription = '';
+                    for (let index = 0; index < 6; index++) {
+                        if (categoryData.input_data[index] != null) {
+                            if (index === 0) {
+                                embedDescription = `**${categoryData.input_data[index][0].name}**\n`;
+                            } else {
+                                embedDescription = embedDescription + `**${categoryData.input_data[index][0].name}**\n`;
+                            }
+                            embedDescription = embedDescription + i.fields.getTextInputValue(`modal-input-${index}`) + `\n`
+                        }
+                    }
+                    let ticketEmbed = await ticketUtils.genEmbed(threadName, embedDescription);
 
-                    i.reply({ content: 'Submitted!' })
+                    let ticketThread = await utils.createPetitionThread(threadName, categoryRecieveChannelID[0].ticket_recieve_channel, client)
+                    ticketThread.send({ content: `<@${i.user.id}>, <@&1317181808588095559> will be with you soon.`, embeds: [ticketEmbed] });
+
+                    i.reply({ content: 'Submitted!', ephemeral: true })
                 }
                 ).catch(error => {
                     console.error(error)
