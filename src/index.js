@@ -10,10 +10,13 @@ require('dotenv').config();
 
 // Create a new client instance
 const client = new BotClient();
-SQLUtils.genDB();
+async function setupDB() {
+    await SQLUtils.genDB();
 
-ticketUtils.genTicketPresets();
+    await ticketUtils.genTicketPresets();
+}
 
+setupDB();
 //utils.getTicketPresets(1302694166266118175);
 client.loadCommands();
 client.loadEvents();
