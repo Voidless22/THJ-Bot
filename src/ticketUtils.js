@@ -62,10 +62,10 @@ let ipExemptionPreset = {
         },
     },
 };
-let otherPreset = {
+let exploitPreset = {
     general: {
         enabled: 1,
-        name: 'Other',
+        name: 'Report an Exploit',
         sendPreEmbed: 0,
         sendPostEmbed: 0,
     },
@@ -83,6 +83,13 @@ let otherPreset = {
         },
         2: {
             enabled: 1,
+            name: 'Involved Character Name(s)',
+            type: 1,
+            required: 1,
+            maxLength: 4000,
+        },
+        3: {
+            enabled: 1,
             name: 'Description',
             type: 2,
             required: 1,
@@ -91,105 +98,212 @@ let otherPreset = {
     }
 
 }
+let lostItemPreset = {
+    general: {
+        enabled: 1,
+        name: 'Lost Item',
+        sendPreEmbed: 0,
+        sendPostEmbed: 0,
+    },
+    embeds: {
+        preEmbedText: null,
+        postEmbedText: null,
+    },
+    inputs: {
+        1: {
+            enabled: 1,
+            name: 'Ticket Title',
+            type: 1,
+            required: 1,
+            maxLength: 4000,
+        },
+        2: {
+            enabled: 1,
+            name: 'Involved Character Name(s)',
+            type: 1,
+            required: 1,
+            maxLength: 4000,
+        },
+        3: {
+            enabled: 1,
+            name: 'Description',
+            type: 2,
+            required: 1,
+            maxLength: 4000,
+        },
+    }
 
+}
+let disputePreset = {
+    general: {
+        enabled: 1,
+        name: 'Player Dispute',
+        sendPreEmbed: 0,
+        sendPostEmbed: 0,
+    },
+    embeds: {
+        preEmbedText: null,
+        postEmbedText: null,
+    },
+    inputs: {
+        1: {
+            enabled: 1,
+            name: 'Ticket Title',
+            type: 1,
+            required: 1,
+            maxLength: 4000,
+        },
+        2: {
+            enabled: 1,
+            name: 'Involved Character Name(s)',
+            type: 1,
+            required: 1,
+            maxLength: 4000,
+        },
+        3: {
+            enabled: 1,
+            name: 'Description',
+            type: 2,
+            required: 1,
+            maxLength: 4000,
+        },
+    }
+
+}
 async function createTicketCategory(categoryData) {
-    let preEmbedId;
-    let postEmbedId;
+    let preEmbedId = null;
+    let postEmbedId = null;
 
     try {
-        if (categoryData.embeds.preEmbedText !== null) {
+        // Handle preEmbed
+        if (categoryData.embeds.preEmbedText) {
             const preEmbedResult = await SQLUtils.SQLQuery(
                 `INSERT INTO Embeds (label, description, preEmbed) 
-                 SELECT ?, ?, ? 
+                 SELECT ?, ?, 1 
                  WHERE NOT EXISTS (
                      SELECT 1 FROM Embeds WHERE label = ? AND preEmbed = 1
                  );`,
-                [categoryData.general.name, categoryData.embeds.preEmbedText, 1, categoryData.general.name]
+                [categoryData.general.name, categoryData.embeds.preEmbedText, categoryData.general.name]
             );
-            preEmbedId = preEmbedResult.insertId; 
 
+            if (preEmbedResult.insertId) {
+                preEmbedId = preEmbedResult.insertId;
+            } else {
+                const existingEmbed = await SQLUtils.SQLQuery(
+                    `SELECT embed_id FROM Embeds WHERE label = ? AND preEmbed = 1;`,
+                    [categoryData.general.name]
+                );
+                if (existingEmbed.length > 0) preEmbedId = existingEmbed[0].embed_id;
+            }
         }
-        if (categoryData.embeds.postEmbedText !== null) {
+
+        // Handle postEmbed
+        if (categoryData.embeds.postEmbedText) {
             const postEmbedResult = await SQLUtils.SQLQuery(
                 `INSERT INTO Embeds (label, description, postEmbed) 
-                SELECT ?, ?, ? 
-                WHERE NOT EXISTS (
-                    SELECT 1 FROM Embeds WHERE label = ? AND postEmbed = 1
-                );`,
-                [categoryData.general.name, categoryData.embeds.postEmbedText, 1, categoryData.general.name]
+                 SELECT ?, ?, 1 
+                 WHERE NOT EXISTS (
+                     SELECT 1 FROM Embeds WHERE label = ? AND postEmbed = 1
+                 );`,
+                [categoryData.general.name, categoryData.embeds.postEmbedText, categoryData.general.name]
             );
 
-            postEmbedId = postEmbedResult.insertId; 
+            if (postEmbedResult.insertId) {
+                postEmbedId = postEmbedResult.insertId;
+            } else {
+                const existingEmbed = await SQLUtils.SQLQuery(
+                    `SELECT embed_id FROM Embeds WHERE label = ? AND postEmbed = 1;`,
+                    [categoryData.general.name]
+                );
+                if (existingEmbed.length > 0) postEmbedId = existingEmbed[0].embed_id;
+            }
         }
-        
+
+        // Handle TextInputs
         const inputIds = {};
         for (let i = 1; i <= 5; i++) {
             const input = categoryData.inputs[i];
             if (input) {
-                const result = await SQLUtils.SQLQuery(
-                    `INSERT INTO TextInputs (name, style, required, max_length) SELECT ?, ?, ?, ?
-                    WHERE NOT EXISTS (SELECT 1 FROM TextInputs WHERE name = ? AND style = ? AND required = ? and max_length = ?)`,
-                    [input.name, input.type, input.required, input.maxLength, input.name, input.type, input.required, input.maxLength]
+                const existingInput = await SQLUtils.SQLQuery(
+                    `SELECT input_id FROM TextInputs WHERE name = ? AND style = ? AND required = ? AND max_length = ?;`,
+                    [input.name, input.type, input.required, input.maxLength]
                 );
-                inputIds[i] = result.insertId; 
+
+                if (existingInput.length > 0) {
+                    inputIds[i] = existingInput[0].input_id;
+                } else {
+                    const result = await SQLUtils.SQLQuery(
+                        `INSERT INTO TextInputs (name, style, required, max_length) VALUES (?, ?, ?, ?);`,
+                        [input.name, input.type, input.required, input.maxLength]
+                    );
+                    inputIds[i] = result.insertId;
+                }
             } else {
                 inputIds[i] = null;
             }
         }
 
-      
-        const modalQuery = `
-        INSERT INTO Modals (
-            name,
-            input_1_enabled, input_1_id,
-            input_2_enabled, input_2_id,
-            input_3_enabled, input_3_id,
-            input_4_enabled, input_4_id,
-            input_5_enabled, input_5_id)
-            SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-            WHERE NOT EXISTS (
-            SELECT 1 FROM Modals WHERE name = ?
-                );`;
-
-        const modalParams = [
-            categoryData.general.name,
-            categoryData.inputs[1]?.enabled || 0, inputIds[1] || null,
-            categoryData.inputs[2]?.enabled || 0, inputIds[2] || null,
-            categoryData.inputs[3]?.enabled || 0, inputIds[3] || null,
-            categoryData.inputs[4]?.enabled || 0, inputIds[4] || null,
-            categoryData.inputs[5]?.enabled || 0, inputIds[5] || null,
-            categoryData.general.name,
-
-        ];
-        const modalResult = await SQLUtils.SQLQuery(modalQuery, modalParams);
-        const modalId = modalResult.insertId;
-
-        await SQLUtils.SQLQuery(
-            `INSERT  INTO tickettype(
-             enabled, name, send_pre_embed, pre_embed_id,
-             modal_id, send_post_embed, post_embed_id, ticket_recieve_channel)
-             SELECT ?, ?, ?, ?, ?, ?, ?, ?
-             WHERE NOT EXISTS (SELECT 1 FROM tickettype WHERE name =? OR modal_id = ?)
-         `,
-            [
-                categoryData.general.enabled,
-                categoryData.general.name,
-                categoryData.general.sendPreEmbed,
-                preEmbedId || null,
-                modalId || null,
-                categoryData.general.sendPostEmbed,
-                postEmbedId || null,
-                0,
-                categoryData.general.name,
-                modalId || null
-            ]
+        // Handle Modal
+        const existingModal = await SQLUtils.SQLQuery(
+            `SELECT modal_id FROM Modals WHERE name = ?;`,
+            [categoryData.general.name]
         );
+
+        let modalId;
+        if (existingModal.length > 0) {
+            modalId = existingModal[0].modal_id;
+        } else {
+            const modalResult = await SQLUtils.SQLQuery(
+                `INSERT INTO Modals (
+                    name,
+                    input_1_enabled, input_1_id,
+                    input_2_enabled, input_2_id,
+                    input_3_enabled, input_3_id,
+                    input_4_enabled, input_4_id,
+                    input_5_enabled, input_5_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+                [
+                    categoryData.general.name,
+                    categoryData.inputs[1]?.enabled || 0, inputIds[1] || null,
+                    categoryData.inputs[2]?.enabled || 0, inputIds[2] || null,
+                    categoryData.inputs[3]?.enabled || 0, inputIds[3] || null,
+                    categoryData.inputs[4]?.enabled || 0, inputIds[4] || null,
+                    categoryData.inputs[5]?.enabled || 0, inputIds[5] || null
+                ]
+            );
+            modalId = modalResult.insertId;
+        }
+
+        // Handle TicketType
+        const existingTicketType = await SQLUtils.SQLQuery(
+            `SELECT type_id FROM tickettype WHERE name = ? OR modal_id = ?;`,
+            [categoryData.general.name, modalId || null]
+        );
+
+        if (existingTicketType.length === 0) {
+            await SQLUtils.SQLQuery(
+                `INSERT INTO tickettype (
+                    enabled, name, send_pre_embed, pre_embed_id,
+                    modal_id, send_post_embed, post_embed_id, ticket_recieve_channel
+                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
+                [
+                    categoryData.general.enabled,
+                    categoryData.general.name,
+                    categoryData.general.sendPreEmbed,
+                    preEmbedId || null,
+                    modalId || null,
+                    categoryData.general.sendPostEmbed,
+                    postEmbedId || null,
+                    0 // Default ticket receive channel
+                ]
+            );
+        }
 
     } catch (error) {
         console.error('Error filling tables:', error.sqlMessage || error.message);
     }
-
 }
+
 
 async function getTicketCategory(name) {
     let category = [];
@@ -252,8 +366,10 @@ async function getTicketCategoryPresets(presetName) {
 
 
 async function genTicketPresets() {
-    createTicketCategory(ipExemptionPreset)
-    createTicketCategory(otherPreset)
+    createTicketCategory(ipExemptionPreset);
+    createTicketCategory(exploitPreset);
+    createTicketCategory(lostItemPreset);
+    createTicketCategory(disputePreset);
 }
 
 async function generateModal(data) {

@@ -84,7 +84,12 @@ module.exports = {
 
                     let ticketThread = await utils.createPetitionThread(threadName, categoryRecieveChannelID[0].ticket_recieve_channel, client)
                     let guideRoleID = await SQLUtils.SQLQuery('SELECT CAST(guide_role_id AS CHAR) AS guide_role_id FROM `General`');
+                    if (guideRoleID.length > 0) {
                     ticketThread.send({ content: `<@${i.user.id}>, <@&${guideRoleID[0].guide_role_id}> will be with you soon.`, embeds: [ticketEmbed] });
+                    } else {
+                        ticketThread.send({ content: `<@${i.user.id}>, Staff will be with you soon.`, embeds: [ticketEmbed] });
+
+                    }
 
                     i.reply({ content: 'Submitted!', ephemeral: true })
                 }
