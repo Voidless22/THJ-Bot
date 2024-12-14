@@ -19,7 +19,6 @@ async function createPetitionThread(threadName, channelID, client) {
             autoArchiveDuration: 10080,
             type: ChannelType.PrivateThread,
         });
-        // Join the thread so we can see and send messages
         petitionSection.threads.cache
             .find((thread) => thread.name == threadName)
             .join();

@@ -1,5 +1,4 @@
-const {ButtonBuilder, ActionRowBuilder } = require('discord.js');
-const SQLUtils = require('../../sqlUtils');
+const { ButtonBuilder, ActionRowBuilder } = require('discord.js');
 
 
 
@@ -17,6 +16,6 @@ module.exports = {
         const row = new ActionRowBuilder().addComponents(createPetitionButton);
 
         await createButtonChannelId.send({ components: [row] });
-        await interaction.reply({content: "Users are now one click away from submitting a ticket!", ephemeral: true})
+        await interaction.reply({ content: "Users are now one click away from submitting a ticket!", ephemeral: true })
     }
 }

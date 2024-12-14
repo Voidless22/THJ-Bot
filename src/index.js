@@ -1,23 +1,17 @@
-// Require the necessary discord.js classes
-const { Client, Events, GatewayIntentBits } = require('discord.js');
 const BotClient = require('./BotClient')
-const utils = require('./utils')
 const SQLUtils = require('./sqlUtils');
 const ticketUtils = require('./ticketUtils');
 
 require('dotenv').config();
 
 
-// Create a new client instance
 const client = new BotClient();
 async function setupDB() {
     await SQLUtils.genDB();
-
     await ticketUtils.genTicketPresets();
 }
 
 setupDB();
-//utils.getTicketPresets(1302694166266118175);
 client.loadCommands();
 client.loadEvents();
 client.loadComponents();

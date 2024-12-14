@@ -1,8 +1,6 @@
 const {RoleSelectMenuBuilder, ActionRowBuilder} = require('discord.js')
 module.exports = {
     customId: 'set-guide-role-button',
-
-
     run: async (client, interaction) => {
         const guideRoleSelect = new RoleSelectMenuBuilder()
         .setCustomId('guide-role-select');

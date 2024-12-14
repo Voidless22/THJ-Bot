@@ -1,4 +1,4 @@
-const { EmbedBuilder, ComponentType, ChannelType } = require('discord.js');
+const { ComponentType } = require('discord.js');
 const utils = require('../../utils');
 const ticketUtils = require('../../ticketUtils');
 const SQLUtils = require('../../sqlUtils')
@@ -9,7 +9,6 @@ module.exports = {
     run: async (client, interaction) => {
         let categoryData = await ticketUtils.getTicketCategory(interaction.values[0]);
         let categoryRecieveChannelID = await SQLUtils.SQLQuery("SELECT CAST(ticket_recieve_channel AS CHAR) AS ticket_recieve_channel FROM `tickettype` WHERE name=?;", [interaction.values[0]]);
-
 
         if (categoryData.general.send_pre_embed === 1) {
             const embed = await ticketUtils.genEmbed(categoryData.pre_embed_data.label, categoryData.pre_embed_data.description);
@@ -50,7 +49,6 @@ module.exports = {
 
                     let ticketThread = await utils.createPetitionThread(threadName, categoryRecieveChannelID[0].ticket_recieve_channel, client)
                     let guideRoleID = await SQLUtils.SQLQuery('SELECT CAST(guide_role_id AS CHAR) AS guide_role_id FROM `General`');
-                    console.log(guideRoleID[0].guide_role_id)
                     ticketThread.send({ content: `<@${i.user.id}>, <@&${guideRoleID[0].guide_role_id}> will be with you soon.`, embeds: [ticketEmbed] });
 
                     i.reply({ content: 'Submitted!', ephemeral: true })
@@ -86,7 +84,6 @@ module.exports = {
 
                     let ticketThread = await utils.createPetitionThread(threadName, categoryRecieveChannelID[0].ticket_recieve_channel, client)
                     let guideRoleID = await SQLUtils.SQLQuery('SELECT CAST(guide_role_id AS CHAR) AS guide_role_id FROM `General`');
-                    console.log(guideRoleID[0].guide_role_id)
                     ticketThread.send({ content: `<@${i.user.id}>, <@&${guideRoleID[0].guide_role_id}> will be with you soon.`, embeds: [ticketEmbed] });
 
                     i.reply({ content: 'Submitted!', ephemeral: true })

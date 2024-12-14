@@ -1,12 +1,9 @@
-const { ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder } = require('discord.js');
-const utils = require('../../utils');
+const { StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
 const SQLUtils = require('../../sqlUtils');
-const ticketUtils = require('../../ticketUtils');
 
 async function processCategories(client, categories) {
     const results = await Promise.all(
         categories.map(async (category) => {
-            // Ensure the ID is a string
             category.ticket_recieve_channel = String(category.ticket_recieve_channel);
 
             const description = await returnStatus(client, category);
@@ -25,7 +22,7 @@ async function returnStatus(client, category) {
     let descriptionText = '';
     let status = category.enabled === 1 ? 'Enabled' : 'Disabled';
 
-    if (category.ticket_recieve_channel === "0") {  // Compare as a string
+    if (category.ticket_recieve_channel === "0") {  
         descriptionText = `${status} | Channel: None`;
     } else {
         try {
@@ -39,19 +36,10 @@ async function returnStatus(client, category) {
 
     return descriptionText;
 }
-function flipStatus(category) {
-    if (category === 1) { return 0; } else { return 1; }
-}
+
 module.exports = {
     customId: 'set-category-channel-button',
-
-    /**
-     * 
-     * @param {ExtendedClient} client 
-     * @param {ButtonInteraction} interaction 
-     */
     run: async (client, interaction) => {
-
         let categories = await SQLUtils.SQLQuery("SELECT name, enabled, CAST(ticket_recieve_channel AS CHAR) AS ticket_recieve_channel FROM `tickettype`;");
 
         if (Object.keys(categories).length === 0) {
@@ -64,8 +52,8 @@ module.exports = {
                 .setCustomId('set-category-channel-list')
                 .setPlaceholder('Ticket Category')
                 .addOptions(processedCategories)
-
                 .setMaxValues(1);
+
             let selectRow = new ActionRowBuilder().addComponents(categorySelect);
 
             await interaction.reply({ content: 'Select which a category to set the reception channel for.', components: [selectRow], ephemeral: true })

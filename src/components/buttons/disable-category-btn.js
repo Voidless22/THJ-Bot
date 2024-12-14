@@ -1,7 +1,5 @@
-const { ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder } = require('discord.js');
-const utils = require('../../utils');
+const { StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
 const SQLUtils = require('../../sqlUtils');
-const ticketUtils = require('../../ticketUtils');
 
 function returnStatus(category) {
     if (category.enabled === 1) { return 'Enabled'; } else { if (category.enabled === 0) return 'Disabled'; }
@@ -9,12 +7,7 @@ function returnStatus(category) {
 
 module.exports = {
     customId: 'disable-category-button',
-
-    /**
-     * 
-     * @param {ExtendedClient} client 
-     * @param {ButtonInteraction} interaction 
-     */
+    
     run: async (client, interaction) => {
 
         let enabledCategories = await SQLUtils.SQLQuery("SELECT * FROM `tickettype` where `enabled` IN (1)");

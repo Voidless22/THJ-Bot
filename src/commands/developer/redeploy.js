@@ -1,7 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
 
-
-
 module.exports = {
     customId: 'redeploy',
     structure: new SlashCommandBuilder()

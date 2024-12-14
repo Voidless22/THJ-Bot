@@ -13,7 +13,6 @@ ipExemptionPreEmbedDescription[7] = '### Please note that your temporary exempti
 ipExemptionPreEmbedDescription[8] = '### If you have any questions, please let us know.';
 
 
-let ipExemption = []
 let ipExemptionPreset = {
     general: {
         enabled: 1,
@@ -99,7 +98,6 @@ async function createTicketCategory(categoryData) {
 
     try {
         if (categoryData.embeds.preEmbedText !== null) {
-            // Insert embeds
             const preEmbedResult = await SQLUtils.SQLQuery(
                 `INSERT INTO Embeds (label, description, preEmbed) 
                  SELECT ?, ?, ? 
@@ -108,7 +106,7 @@ async function createTicketCategory(categoryData) {
                  );`,
                 [categoryData.general.name, categoryData.embeds.preEmbedText, 1, categoryData.general.name]
             );
-            preEmbedId = preEmbedResult.insertId; // Retrieve the ID of the inserted pre-embed
+            preEmbedId = preEmbedResult.insertId; 
 
         }
         if (categoryData.embeds.postEmbedText !== null) {
@@ -121,9 +119,9 @@ async function createTicketCategory(categoryData) {
                 [categoryData.general.name, categoryData.embeds.postEmbedText, 1, categoryData.general.name]
             );
 
-            postEmbedId = postEmbedResult.insertId; // Retrieve the ID of the inserted post-embed
+            postEmbedId = postEmbedResult.insertId; 
         }
-        // Insert inputs dynamically
+        
         const inputIds = {};
         for (let i = 1; i <= 5; i++) {
             const input = categoryData.inputs[i];
@@ -133,13 +131,13 @@ async function createTicketCategory(categoryData) {
                     WHERE NOT EXISTS (SELECT 1 FROM TextInputs WHERE name = ? AND style = ? AND required = ? and max_length = ?)`,
                     [input.name, input.type, input.required, input.maxLength, input.name, input.type, input.required, input.maxLength]
                 );
-                inputIds[i] = result.insertId; // Store input ID for each valid input
+                inputIds[i] = result.insertId; 
             } else {
-                inputIds[i] = null; // Placeholder for missing inputs
+                inputIds[i] = null;
             }
         }
 
-        // Insert modal with dynamic inputs
+      
         const modalQuery = `
         INSERT INTO Modals (
             name,
@@ -164,9 +162,8 @@ async function createTicketCategory(categoryData) {
 
         ];
         const modalResult = await SQLUtils.SQLQuery(modalQuery, modalParams);
-        const modalId = modalResult.insertId; // Retrieve the ID of the inserted modal
+        const modalId = modalResult.insertId;
 
-        // Insert ticket type
         await SQLUtils.SQLQuery(
             `INSERT  INTO tickettype(
              enabled, name, send_pre_embed, pre_embed_id,
@@ -188,7 +185,6 @@ async function createTicketCategory(categoryData) {
             ]
         );
 
-        console.log('Tables filled successfully!');
     } catch (error) {
         console.error('Error filling tables:', error.sqlMessage || error.message);
     }

@@ -1,13 +1,9 @@
-const { SlashCommandBuilder, ChannelType, ActionRowBuilder, ButtonBuilder, PermissionsBitField, StringSelectMenuBuilder, ActionRow } = require('discord.js');
-const ticketUtils = require('../../ticketUtils');
-const SQLUtils = require('../../sqlUtils')
+const { SlashCommandBuilder,ActionRowBuilder, ButtonBuilder, PermissionsBitField } = require('discord.js');
 module.exports = {
     name: 'ticketsetup',
     structure: new SlashCommandBuilder()
         .setName('ticketsetup')
         .setDescription('Set up ticket creation and reception.'),
-
-
 
     run: async (client, interaction, args) => {
         if (!interaction.member.permissions.has([PermissionsBitField.Flags.ManageChannels, PermissionsBitField.Flags.ManageRoles])) {

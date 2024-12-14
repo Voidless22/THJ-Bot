@@ -1,8 +1,6 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-
-
 const dbConfig = {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
@@ -11,7 +9,6 @@ const dbConfig = {
     database: process.env.DB_NAME
 }
 const dbPool = mysql.createPool(dbConfig);
-
 
 async function SQLQuery(sql, values) {
     const connection = await dbPool.getConnection();
