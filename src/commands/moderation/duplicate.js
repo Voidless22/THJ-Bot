@@ -40,7 +40,6 @@ module.exports = {
 
             // Ping the OP in the target thread
             await targetThread.send(`<@${opMessage.author.id}>, your report has been moved here.`);
-            await currentThread.send({ content: `This thread has been marked as a duplicate, and the original message has been moved here: <#${currentThread.id}>.` })
             // Acknowledge the staff's command
             await interaction.reply({
                 content: `This thread has been marked as a duplicate of "${targetThread.name}" and closed.`,
@@ -50,6 +49,7 @@ module.exports = {
             // Lock and archive the current thread
             await currentThread.setLocked(true);
             await currentThread.setArchived(true);
+            await currentThread.delete();
 
 
         } catch (error) {
