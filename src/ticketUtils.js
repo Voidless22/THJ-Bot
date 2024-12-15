@@ -284,8 +284,8 @@ async function createTicketCategory(categoryData) {
             await SQLUtils.SQLQuery(
                 `INSERT INTO tickettype (
                     enabled, name, send_pre_embed, pre_embed_id,
-                    modal_id, send_post_embed, post_embed_id, ticket_recieve_channel
-                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
+                    modal_id, send_post_embed, post_embed_id, ticket_recieve_channel, ping_staff_role
+                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?);`,
                 [
                     categoryData.general.enabled,
                     categoryData.general.name,
@@ -294,7 +294,8 @@ async function createTicketCategory(categoryData) {
                     modalId || null,
                     categoryData.general.sendPostEmbed,
                     postEmbedId || null,
-                    0 // Default ticket receive channel
+                    0,// Default ticket receive channel
+                    0 // Ping staff role
                 ]
             );
         }

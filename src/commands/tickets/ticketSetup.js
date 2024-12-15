@@ -1,4 +1,4 @@
-const { SlashCommandBuilder,ActionRowBuilder, ButtonBuilder, PermissionsBitField } = require('discord.js');
+const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, PermissionsBitField } = require('discord.js');
 module.exports = {
     name: 'ticketsetup',
     structure: new SlashCommandBuilder()
@@ -32,13 +32,21 @@ module.exports = {
             .setLabel('Preview Category')
             .setStyle(1);
         let setGuideRole = new ButtonBuilder()
-            .setCustomId('set-guide-role-button')
-            .setLabel('Set Guide Role')
+            .setCustomId('set-staff-role-button')
+            .setLabel('Set Staff Role')
+            .setStyle(3);
+        let enableCategoryPing = new ButtonBuilder()
+            .setCustomId('enable-category-ping-button')
+            .setLabel('Enable Category Ping')
+            .setStyle(3);
+        let disableCategoryPing = new ButtonBuilder()
+            .setCustomId('disable-category-ping-button')
+            .setLabel('Disable Category Ping')
             .setStyle(3);
 
         const firstRow = new ActionRowBuilder().addComponents([enableCategoryButton, setCategoryChannelButton, sendCreateTicketButton]);
         const secondRow = new ActionRowBuilder().addComponents([disableCategoryButton, previewCategoryButton, setGuideRole]);
-
-        await interaction.reply({ components: [firstRow, secondRow] })
+        const thirdRow = new ActionRowBuilder().addComponents([enableCategoryPing, disableCategoryPing])
+        await interaction.reply({ components: [firstRow, secondRow,thirdRow] })
     }
 }

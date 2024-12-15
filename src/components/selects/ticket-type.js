@@ -8,7 +8,7 @@ module.exports = {
 
     run: async (client, interaction) => {
         let categoryData = await ticketUtils.getTicketCategory(interaction.values[0]);
-        let categoryRecieveChannelID = await SQLUtils.SQLQuery("SELECT CAST(ticket_recieve_channel AS CHAR) AS ticket_recieve_channel FROM `tickettype` WHERE name=?;", [interaction.values[0]]);
+        let categoryRecieveChannelID = await SQLUtils.SQLQuery("SELECT CAST(ticket_recieve_channel AS CHAR) AS ticket_recieve_channel FROM `tickettype` WHERE type_id=?;", [categoryData.general.type_id]);
 
         if (categoryData.general.send_pre_embed === 1) {
             const embed = await ticketUtils.genEmbed(categoryData.pre_embed_data.label, categoryData.pre_embed_data.description);
@@ -48,8 +48,8 @@ module.exports = {
                     let ticketEmbed = await ticketUtils.genEmbed(threadName, embedDescription);
 
                     let ticketThread = await utils.createPetitionThread(threadName, categoryRecieveChannelID[0].ticket_recieve_channel, client)
-                    let guideRoleID = await SQLUtils.SQLQuery('SELECT CAST(guide_role_id AS CHAR) AS guide_role_id FROM `General`');
-                    ticketThread.send({ content: `<@${i.user.id}>, <@&${guideRoleID[0].guide_role_id}> will be with you soon.`, embeds: [ticketEmbed] });
+                    let guideRoleID = await SQLUtils.SQLQuery('SELECT CAST(staff_role_id AS CHAR) AS staff_role_id FROM `General`');
+                    ticketThread.send({ content: `<@${i.user.id}>, <@&${guideRoleID[0].staff_role_id}> will be with you soon.`, embeds: [ticketEmbed] });
 
                     i.reply({ content: 'Submitted!', ephemeral: true })
                 }
@@ -83,10 +83,15 @@ module.exports = {
                     let ticketEmbed = await ticketUtils.genEmbed(threadName, embedDescription);
 
                     let ticketThread = await utils.createPetitionThread(threadName, categoryRecieveChannelID[0].ticket_recieve_channel, client)
-                    let guideRoleID = await SQLUtils.SQLQuery('SELECT CAST(guide_role_id AS CHAR) AS guide_role_id FROM `General`');
-                    if (guideRoleID.length > 0) {
-                    ticketThread.send({ content: `<@${i.user.id}>, <@&${guideRoleID[0].guide_role_id}> will be with you soon.`, embeds: [ticketEmbed] });
-                    } else {
+                    let pingStaffRole = await SQLUtils.SQLQuery('SELECT ping_staff_role FROM `tickettype` WHERE type_id=?;', [categoryData.general.type_id]);
+                    console.log(pingStaffRole)
+                    if (pingStaffRole[0].ping_staff_role === 1) {
+                        let guideRoleID = await SQLUtils.SQLQuery('SELECT CAST(staff_role_id AS CHAR) AS staff_role_id FROM `general`');
+                        if (guideRoleID.length > 0) {
+                            ticketThread.send({ content: `<@${i.user.id}>, <@&${guideRoleID[0].staff_role_id}> will be with you soon.`, embeds: [ticketEmbed] });
+                        }
+                    }
+                    else {
                         ticketThread.send({ content: `<@${i.user.id}>, Staff will be with you soon.`, embeds: [ticketEmbed] });
 
                     }
