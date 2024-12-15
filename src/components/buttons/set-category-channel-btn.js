@@ -1,4 +1,4 @@
-const { StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
+const { PermissionsBitField,StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
 const SQLUtils = require('../../sqlUtils');
 
 async function processCategories(client, categories) {
@@ -22,7 +22,7 @@ async function returnStatus(client, category) {
     let descriptionText = '';
     let status = category.enabled === 1 ? 'Enabled' : 'Disabled';
 
-    if (category.ticket_recieve_channel === "0") {  
+    if (category.ticket_recieve_channel === "0") {
         descriptionText = `${status} | Channel: None`;
     } else {
         try {
@@ -40,6 +40,10 @@ async function returnStatus(client, category) {
 module.exports = {
     customId: 'set-category-channel-button',
     run: async (client, interaction) => {
+        if (!interaction.member.permissions.has([PermissionsBitField.Flags.ManageChannels, PermissionsBitField.Flags.ManageRoles])) {
+            await interaction.reply('You need permission to manage channels and roles to use this command.');
+            return;
+        }
         let categories = await SQLUtils.SQLQuery("SELECT name, enabled, CAST(ticket_recieve_channel AS CHAR) AS ticket_recieve_channel FROM `tickettype`;");
 
         if (Object.keys(categories).length === 0) {

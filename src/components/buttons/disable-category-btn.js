@@ -1,4 +1,4 @@
-const { StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
+const { PermissionsBitField, StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
 const SQLUtils = require('../../sqlUtils');
 
 function returnStatus(category) {
@@ -9,7 +9,10 @@ module.exports = {
     customId: 'disable-category-button',
     
     run: async (client, interaction) => {
-
+        if (!interaction.member.permissions.has([PermissionsBitField.Flags.ManageChannels, PermissionsBitField.Flags.ManageRoles])) {
+            await interaction.reply('You need permission to manage channels and roles to use this command.');
+            return;
+        }
         let enabledCategories = await SQLUtils.SQLQuery("SELECT * FROM `tickettype` where `enabled` IN (1)");
 
         if (Object.keys(enabledCategories).length === 0) {
