@@ -48,9 +48,17 @@ module.exports = {
                     let ticketEmbed = await ticketUtils.genEmbed(threadName, embedDescription);
 
                     let ticketThread = await utils.createPetitionThread(threadName, categoryRecieveChannelID[0].ticket_recieve_channel, client)
-                    let guideRoleID = await SQLUtils.SQLQuery('SELECT CAST(staff_role_id AS CHAR) AS staff_role_id FROM `General`');
-                    ticketThread.send({ content: `<@${i.user.id}>, <@&${guideRoleID[0].staff_role_id}> will be with you soon.`, embeds: [ticketEmbed] });
+                    let pingStaffRole = await SQLUtils.SQLQuery('SELECT ping_staff_role FROM `tickettype` WHERE type_id=?;', [categoryData.general.type_id]);
+                    if (pingStaffRole[0].ping_staff_role === 1) {
+                        let guideRoleID = await SQLUtils.SQLQuery('SELECT CAST(staff_role_id AS CHAR) AS staff_role_id FROM `general`');
+                        if (guideRoleID.length > 0) {
+                            ticketThread.send({ content: `<@${i.user.id}>, <@&${guideRoleID[0].staff_role_id}> will be with you soon.`, embeds: [ticketEmbed] });
+                        }
+                    }
+                    else {
+                        ticketThread.send({ content: `<@${i.user.id}>, Staff will be with you soon.`, embeds: [ticketEmbed] });
 
+                    }
                     i.reply({ content: 'Submitted!', ephemeral: true })
                 }
                 )
@@ -84,7 +92,7 @@ module.exports = {
 
                     let ticketThread = await utils.createPetitionThread(threadName, categoryRecieveChannelID[0].ticket_recieve_channel, client)
                     let pingStaffRole = await SQLUtils.SQLQuery('SELECT ping_staff_role FROM `tickettype` WHERE type_id=?;', [categoryData.general.type_id]);
-                    console.log(pingStaffRole)
+                    let categoryChannel = await client.channels.fetch(categoryRecieveChannelID[0].ticket_recieve_channel);
                     if (pingStaffRole[0].ping_staff_role === 1) {
                         let guideRoleID = await SQLUtils.SQLQuery('SELECT CAST(staff_role_id AS CHAR) AS staff_role_id FROM `general`');
                         if (guideRoleID.length > 0) {
@@ -93,7 +101,7 @@ module.exports = {
                     }
                     else {
                         ticketThread.send({ content: `<@${i.user.id}>, Staff will be with you soon.`, embeds: [ticketEmbed] });
-
+                        categoryChannel.send({content: `New Ticket Submitted: <#${ticketThread.id}>`})
                     }
 
                     i.reply({ content: 'Submitted!', ephemeral: true })
