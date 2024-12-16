@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, PermissionsBitField } = require('discord.js');
+const setCategoryLogChannelBtn = require('../../components/buttons/set-category-log-channel-btn');
 module.exports = {
     name: 'ticketsetup',
     structure: new SlashCommandBuilder()
@@ -18,6 +19,10 @@ module.exports = {
         let setCategoryChannelButton = new ButtonBuilder()
             .setCustomId('set-category-channel-button')
             .setLabel('Set Category Channel')
+            .setStyle(1);
+        let SetCategoryLogChannelButton = new ButtonBuilder()
+            .setCustomId('set-category-log-channel-button')
+            .setLabel('Set Log/Archival Category Channel')
             .setStyle(1);
         let sendCreateTicketButton = new ButtonBuilder()
             .setCustomId('send-create-ticket-button')
@@ -44,9 +49,9 @@ module.exports = {
             .setLabel('Disable Category Ping')
             .setStyle(3);
 
-        const firstRow = new ActionRowBuilder().addComponents([enableCategoryButton, setCategoryChannelButton, sendCreateTicketButton]);
-        const secondRow = new ActionRowBuilder().addComponents([disableCategoryButton, previewCategoryButton, setGuideRole]);
-        const thirdRow = new ActionRowBuilder().addComponents([enableCategoryPing, disableCategoryPing])
-        await interaction.reply({ components: [firstRow, secondRow,thirdRow] })
+        const firstRow = new ActionRowBuilder().addComponents([enableCategoryButton, disableCategoryButton, setCategoryChannelButton, sendCreateTicketButton]);
+        const secondRow = new ActionRowBuilder().addComponents([enableCategoryPing, disableCategoryPing, previewCategoryButton, SetCategoryLogChannelButton]);
+        const thirdRow = new ActionRowBuilder().addComponents([setGuideRole])
+        await interaction.reply({ components: [firstRow, secondRow, thirdRow] })
     }
 }

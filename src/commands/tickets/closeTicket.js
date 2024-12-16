@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, PermissionsBitField, AttachmentBuilder } = require('discord.js');
 const axios = require('axios');
+const sqlUtils = require('../../sqlUtils');
 // Recursive message fetcher
 async function fetchAllMessages(channel) {
     let allMessages = [];
@@ -47,11 +48,12 @@ module.exports = {
             // Fetch all messages in the thread
             const messages = await fetchAllMessages(thread);
             const sortedMessages = messages.sort((a, b) => a.createdTimestamp - b.createdTimestamp);
-
-            // Fetch or create the logs channel
-            const logsChannel = interaction.guild.channels.cache.find(channel => channel.name === 'logs');
+            let logChannelId = await sqlUtils.SQLQuery('SELECT CAST(ticket_log_channel AS CHAR) AS ticket_log_channel FROM `tickettype` WHERE ticket_recieve_channel = ?', [thread.parentId])
+            const logsChannel = await client.channels.fetch(logChannelId[0].ticket_log_channel);
+           
             if (!logsChannel) {
-                await interaction.reply({ content: 'Logs channel not found. Please create a "logs" channel.', ephemeral: true });
+                await interaction.editReply({ content: 'Log Channel for this category not found. Canceling ticket archival and closing. Please use /ticketsetup to set the log channel.', ephemeral: true });
+                return;
             }
 
             // Create a new thread in the logs channel
@@ -109,7 +111,7 @@ module.exports = {
             });
 
             await interaction.editReply({ content: 'Thread has been logged and deleted. A log thread has been created in the logs channel.', ephemeral: true });
-
+            logThread.setArchived(true);
             await thread.delete(); 
 
         } catch (error) {
