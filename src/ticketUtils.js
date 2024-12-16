@@ -317,7 +317,6 @@ async function getTicketCategory(name) {
     if (name != null) {
         category = await SQLUtils.SQLQuery("SELECT * FROM `tickettype` WHERE name=?", [name]);
         modal_data = await SQLUtils.SQLQuery("SELECT * FROM `modals` WHERE modal_id=?", [category[0].modal_id]);
-        console.log(modal_data)
         if (category[0].send_pre_embed === 1) {
             pre_embed_data = await SQLUtils.SQLQuery("SELECT * FROM `embeds` WHERE embed_id=?", [category[0].pre_embed_id])
         }
@@ -329,7 +328,6 @@ async function getTicketCategory(name) {
 
             if (modal_data[0][`input_${i}_enabled`] === 1) {
                 input_data[i] = await SQLUtils.SQLQuery("SELECT * FROM `textinputs` WHERE input_id=?", [modal_data[0][`input_${i}_id`]])
-                console.log(input_data[i])
                 if (input_data[i][0].required == 1) {
                     input_data[i][0].required = true;
                 } else {
