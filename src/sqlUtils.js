@@ -185,6 +185,22 @@ async function genDB() {
                 staff_role_id: "BIGINT NOT NULL DEFAULT '0'"
             },
             primaryKey: ['guild_id']
+        },
+        {
+            table: "tickettimer",
+            createQuery: `CREATE TABLE tickettimer (
+                guild_id BIGINT PRIMARY KEY,
+                discord_usr_id BIGINT NOT NULL DEFAULT '0',
+                ticket_cat_id INT NOT NULL DEFAULT '0',
+                last_ticket_time TIMESTAMP
+            );`,
+            columns: {
+                guild_id: "BIGINT PRIMARY KEY ",
+                discord_usr_id: "BIGINT NOT NULL DEFAULT '0'",
+                ticket_cat_id: "INT NOT NULL DEFAULT '0'",
+                last_ticket_time: "TIMESTAMP"
+            },
+            primaryKey: ['guild_id']
         }
     ];
 

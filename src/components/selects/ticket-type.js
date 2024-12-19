@@ -13,14 +13,18 @@ module.exports = {
         let lastOpenedTicketTime = await SQLUtils.SQLQuery(`SELECT last_ticket_time FROM tickettimer WHERE guild_id = ? AND discord_usr_id = ? AND ticket_cat_id = ?;`, [interaction.guild.id, interaction.user.id, categoryData.general.type_id])
         let ticketLockoutTime = await SQLUtils.SQLQuery(`Select ticket_lockout_time from general where guild_id = ?`, [interaction.guild.id]);
         const currentTimestamp = new Date();
-        const convertedLastTicketTime = new Date(lastOpenedTicketTime[0].last_ticket_time);
-        const timeDiffMS = currentTimestamp - convertedLastTicketTime;
 
-        const timeDiffMinutes = Math.floor(timeDiffMS / (1000 * 60));
-        let timeLeft = ticketLockoutTime[0].ticket_lockout_time - timeDiffMinutes;
-        if (timeDiffMinutes < ticketLockoutTime[0].ticket_lockout_time) {
-            await interaction.reply({ content: `Sorry but it looks like you're opening tickets a bit too quick! You need to wait ${timeLeft} more minutes.`, ephemeral: true });
-            return;
+        if (lastOpenedTicketTime.length !== 0) {
+            const convertedLastTicketTime = new Date(lastOpenedTicketTime[0].last_ticket_time);
+            const timeDiffMS = currentTimestamp - convertedLastTicketTime;
+
+            const timeDiffMinutes = Math.floor(timeDiffMS / (1000 * 60));
+            let timeLeft = ticketLockoutTime[0].ticket_lockout_time - timeDiffMinutes;
+
+            if (timeDiffMinutes < ticketLockoutTime[0].ticket_lockout_time) {
+                await interaction.reply({ content: `Sorry but it looks like you're opening tickets a bit too quick! You need to wait ${timeLeft} more minutes.`, ephemeral: true });
+                return;
+            }
         }
         if (categoryData.general.send_pre_embed === 1) {
             const embed = await ticketUtils.genEmbed(categoryData.pre_embed_data.label, categoryData.pre_embed_data.description);
@@ -117,7 +121,7 @@ module.exports = {
                     }
 
 
-                    await SQLUtils.SQLQuery(`INSERT INTO tickettimer (guild_id, discord_usr_id, ticket_cat_id) VALUES (?,?,?) ON DUPLICATE KEY UPDATE last_ticket_time = ?`, [interaction.guild.id, interaction.user.id, categoryData.general.type_id, currentTimestamp]);
+                    await SQLUtils.SQLQuery(`INSERT INTO tickettimer (guild_id, discord_usr_id, ticket_cat_id, last_ticket_time) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE last_ticket_time = ?`, [interaction.guild.id, interaction.user.id, categoryData.general.type_id, currentTimestamp,currentTimestamp]);
 
                     i.reply({ content: 'Submitted!', ephemeral: true })
                 }
