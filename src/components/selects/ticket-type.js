@@ -11,12 +11,15 @@ module.exports = {
         let categoryRecieveChannelID = await SQLUtils.SQLQuery("SELECT CAST(ticket_recieve_channel AS CHAR) AS ticket_recieve_channel FROM `tickettype` WHERE type_id=?;", [categoryData.general.type_id]);
 
         let lastOpenedTicketTime = await SQLUtils.SQLQuery(`SELECT last_ticket_time FROM tickettimer WHERE guild_id = ? AND discord_usr_id = ? AND ticket_cat_id = ?;`, [interaction.guild.id, interaction.user.id, categoryData.general.type_id])
+        let ticketLockoutTime = await SQLUtils.SQLQuery(`Select ticket_lockout_time from general where guild_id = ?`, [interaction.guild.id]);
         const currentTimestamp = new Date();
         const convertedLastTicketTime = new Date(lastOpenedTicketTime[0].last_ticket_time);
         const timeDiffMS = currentTimestamp - convertedLastTicketTime;
+
         const timeDiffMinutes = Math.floor(timeDiffMS / (1000 * 60));
-        if (timeDiffMinutes < 1) {
-            await interaction.reply({ content: `Sorry but it looks like you're opening tickets a bit too quick!`, ephemeral: true });
+        let timeLeft = ticketLockoutTime[0].ticket_lockout_time - timeDiffMinutes;
+        if (timeDiffMinutes < ticketLockoutTime[0].ticket_lockout_time) {
+            await interaction.reply({ content: `Sorry but it looks like you're opening tickets a bit too quick! You need to wait ${timeLeft} more minutes.`, ephemeral: true });
             return;
         }
         if (categoryData.general.send_pre_embed === 1) {
