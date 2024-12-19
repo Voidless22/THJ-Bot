@@ -42,13 +42,13 @@ async function modifyColumn(table, columnName, definition, isPrimaryKey) {
     const timestamp = Date.now();
     const tempTable = `${table}_temp_${timestamp}`;
     const isAutoIncrement = definition.toUpperCase().includes('AUTO_INCREMENT');
-    
+
     await SQLQuery('SET FOREIGN_KEY_CHECKS=0');
-    
+
     try {
         await SQLQuery(`DROP TABLE IF EXISTS ${tempTable}`);
         const foreignKeys = await getForeignKeys(table);
-        
+
         if (isAutoIncrement) {
             await SQLQuery(`CREATE TABLE ${tempTable} LIKE ${table}`);
             await SQLQuery(`ALTER TABLE ${tempTable} MODIFY COLUMN ${columnName} ${definition}`);
@@ -88,8 +88,7 @@ async function modifyColumn(table, columnName, definition, isPrimaryKey) {
 }
 
 function buildColumnDefinition(column) {
-    return `${column.COLUMN_TYPE} ${column.IS_NULLABLE === 'YES' ? '' : 'NOT NULL'} ${
-        column.COLUMN_DEFAULT ? `DEFAULT ${column.COLUMN_DEFAULT}` : ''} ${column.EXTRA}`.trim();
+    return `${column.COLUMN_TYPE} ${column.IS_NULLABLE === 'YES' ? '' : 'NOT NULL'} ${column.COLUMN_DEFAULT ? `DEFAULT ${column.COLUMN_DEFAULT}` : ''} ${column.EXTRA}`.trim();
 }
 
 function arrayEquals(a, b) {
@@ -201,13 +200,43 @@ async function genDB() {
                 last_ticket_time: "TIMESTAMP"
             },
             primaryKey: ['guild_id']
-        }
+        },
+        {
+            table: "tickettype",
+            createQuery: `CREATE TABLE tickettype (
+                type_id INT PRIMARY KEY AUTO_INCREMENT,
+                enabled TINYINT(1) NOT NULL,
+                name VARCHAR(255) NOT NULL,
+                send_pre_embed TINYINT(1) NOT NULL,
+                pre_embed_id INT,
+                modal_id INT,
+                send_post_embed TINYINT(1) NOT NULL,
+                post_embed_id INT,
+                ticket_recieve_channel VARCHAR(255),
+                ping_staff_role TINYINT(1) NOT NULL,
+                ticket_log_channel VARCHAR(255)
+            );`,
+            columns: {
+                type_id: "INT AUTO_INCREMENT PRIMARY KEY",
+                enabled: "TINYINT(1) NOT NULL",
+                name: "VARCHAR(255) NOT NULL",
+                send_pre_embed: "TINYINT(1) NOT NULL",
+                pre_embed_id: "INT",
+                modal_id: "INT",
+                send_post_embed: "TINYINT(1) NOT NULL",
+                post_embed_id: "INT",
+                ticket_recieve_channel: "VARCHAR(255)",
+                ping_staff_role: "TINYINT(1) NOT NULL",
+                ticket_log_channel: "VARCHAR(255)"
+            },
+            primaryKey: ["type_id"]
+        },
     ];
 
     try {
         for (const { table, createQuery, columns, primaryKey } of tableDefinitions) {
             const tableExists = await SQLQuery(`SHOW TABLES LIKE '${table}'`);
-            
+
             if (tableExists.length === 0) {
                 await SQLQuery(createQuery);
                 continue;
@@ -216,7 +245,7 @@ async function genDB() {
             const existingColumns = await SQLQuery(`
                 SELECT COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT, EXTRA, COLUMN_KEY
                 FROM INFORMATION_SCHEMA.COLUMNS 
-                WHERE TABLE_NAME = ? AND TABLE_SCHEMA = ?`, 
+                WHERE TABLE_NAME = ? AND TABLE_SCHEMA = ?`,
                 [table, process.env.DB_NAME]
             );
 
@@ -224,7 +253,7 @@ async function genDB() {
             try {
                 for (const [columnName, definition] of Object.entries(columns)) {
                     const existingColumn = existingColumns.find(col => col.COLUMN_NAME === columnName);
-                    
+
                     if (!existingColumn) {
                         await SQLQuery(`ALTER TABLE ${table} ADD COLUMN ${columnName} ${definition}`);
                         continue;
