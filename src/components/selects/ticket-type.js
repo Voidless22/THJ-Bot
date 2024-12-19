@@ -10,6 +10,15 @@ module.exports = {
         let categoryData = await ticketUtils.getTicketCategory(interaction.values[0]);
         let categoryRecieveChannelID = await SQLUtils.SQLQuery("SELECT CAST(ticket_recieve_channel AS CHAR) AS ticket_recieve_channel FROM `tickettype` WHERE type_id=?;", [categoryData.general.type_id]);
 
+        let lastOpenedTicketTime = await SQLUtils.SQLQuery(`SELECT last_ticket_time FROM tickettimer WHERE guild_id = ? AND discord_usr_id = ? AND ticket_cat_id = ?;`, [interaction.guild.id, interaction.user.id, categoryData.general.type_id])
+        const currentTimestamp = new Date();
+        const convertedLastTicketTime = new Date(lastOpenedTicketTime[0].last_ticket_time);
+        const timeDiffMS = currentTimestamp - convertedLastTicketTime;
+        const timeDiffMinutes = Math.floor(timeDiffMS / (1000 * 60));
+        if (timeDiffMinutes < 1) {
+            await interaction.reply({ content: `Sorry but it looks like you're opening tickets a bit too quick!`, ephemeral: true });
+            return;
+        }
         if (categoryData.general.send_pre_embed === 1) {
             const embed = await ticketUtils.genEmbed(categoryData.pre_embed_data.label, categoryData.pre_embed_data.description);
             const button = ticketUtils.genContinueButton();
@@ -101,8 +110,11 @@ module.exports = {
                     }
                     else {
                         ticketThread.send({ content: `<@${i.user.id}>, Staff will be with you soon.`, embeds: [ticketEmbed] });
-                        categoryChannel.send({content: `New Ticket Submitted: <#${ticketThread.id}>`})
+                        categoryChannel.send({ content: `New Ticket Submitted: <#${ticketThread.id}>` })
                     }
+
+
+                    await SQLUtils.SQLQuery(`INSERT INTO tickettimer (guild_id, discord_usr_id, ticket_cat_id) VALUES (?,?,?) ON DUPLICATE KEY UPDATE last_ticket_time = ?`, [interaction.guild.id, interaction.user.id, categoryData.general.type_id, currentTimestamp]);
 
                     i.reply({ content: 'Submitted!', ephemeral: true })
                 }

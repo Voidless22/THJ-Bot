@@ -1,7 +1,5 @@
 const { ButtonBuilder, ActionRowBuilder } = require('discord.js');
 
-
-
 module.exports = {
     customId: 'ticket-create-channel-list',
 

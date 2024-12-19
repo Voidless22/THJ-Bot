@@ -48,10 +48,13 @@ module.exports = {
             .setCustomId('disable-category-ping-button')
             .setLabel('Disable Category Ping')
             .setStyle(3);
-
+        let setLockoutTime = new ButtonBuilder()
+            .setCustomId('set-lockout-time-button')
+            .setLabel('Set Ticket Lockout Time')
+            .setStyle(3);
         const firstRow = new ActionRowBuilder().addComponents([enableCategoryButton, disableCategoryButton, setCategoryChannelButton, sendCreateTicketButton]);
         const secondRow = new ActionRowBuilder().addComponents([enableCategoryPing, disableCategoryPing, previewCategoryButton, SetCategoryLogChannelButton]);
-        const thirdRow = new ActionRowBuilder().addComponents([setGuideRole])
+        const thirdRow = new ActionRowBuilder().addComponents([setGuideRole,setLockoutTime])
         await interaction.reply({ components: [firstRow, secondRow, thirdRow] })
     }
 }

@@ -60,7 +60,7 @@ module.exports = {
 
             let selectRow = new ActionRowBuilder().addComponents(categorySelect);
 
-            await interaction.reply({ content: 'Select which a category to set the logging channel for.', components: [selectRow], ephemeral: true })
+            await interaction.reply({ content: 'Select a category to set the logging channel for.', components: [selectRow], ephemeral: true })
 
 
         }
