@@ -12,6 +12,12 @@ module.exports = {
 
         let lastOpenedTicketTime = await SQLUtils.SQLQuery(`SELECT last_ticket_time FROM tickettimer WHERE guild_id = ? AND discord_usr_id = ? AND ticket_cat_id = ?;`, [interaction.guild.id, interaction.user.id, categoryData.general.type_id])
         let ticketLockoutTime = await SQLUtils.SQLQuery(`Select ticket_lockout_time from general where guild_id = ?`, [interaction.guild.id]);
+      
+        if (categoryRecieveChannelID.length === 0) {
+            await interaction.reply({ content: 'This ticket category does not have a reception channel. This can be fixed via /ticketsetup.', ephemeral: true });
+        }
+
+      
         const currentTimestamp = new Date();
 
         if (lastOpenedTicketTime.length !== 0) {

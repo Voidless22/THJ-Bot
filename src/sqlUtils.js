@@ -24,251 +24,164 @@ async function SQLQuery(sql, values) {
     }
 }
 
-async function getForeignKeys(table) {
-    return await SQLQuery(`
-        SELECT 
-            CONSTRAINT_NAME,
-            COLUMN_NAME,
-            REFERENCED_TABLE_NAME,
-            REFERENCED_COLUMN_NAME
-        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-        WHERE TABLE_NAME = ?
-        AND REFERENCED_TABLE_NAME IS NOT NULL`,
-        [table]
-    );
-}
+const tableDefinitions = [
+    {
+        table: "embeds",
+        createQuery: `CREATE TABLE embeds (
+            embed_id INT PRIMARY KEY AUTO_INCREMENT,
+            label VARCHAR(255) NOT NULL,
+            description TEXT,
+            preEmbed INT,
+            postEmbed INT
+        );`,
+        columns: [
+            { columnName: "embed_id", columnDef: "INT AUTO_INCREMENT" },
+            { columnName: "label", columnDef: "VARCHAR(255) NOT NULL" },
+            { columnName: "description", columnDef: "TEXT" },
+            { columnName: "preEmbed", columnDef: "INT" },
+            { columnName: "postEmbed", columnDef: "INT" }
+        ],
+        primaryKey: ["embed_id"]
+    },
+    {
+        table: "textinputs",
+        createQuery: `CREATE TABLE textinputs (
+            input_id INT PRIMARY KEY AUTO_INCREMENT,
+            name VARCHAR(255) NOT NULL,
+            style INT NOT NULL,
+            required TINYINT NOT NULL,
+            max_length INT
+        );`,
+        columns: [
+            { columnName: "input_id", columnDef: "INT AUTO_INCREMENT" },
+            { columnName: "name", columnDef: "VARCHAR(255) NOT NULL" },
+            { columnName: "style", columnDef: "INT NOT NULL" },
+            { columnName: "required", columnDef: "TINYINT NOT NULL" },
+            { columnName: "max_length", columnDef: "INT" }
+        ],
+        primaryKey: ["input_id"]
+    },
+    {
+        table: "modals",
+        createQuery: `CREATE TABLE modals (
+            modal_id INT PRIMARY KEY AUTO_INCREMENT,
+            name VARCHAR(255) NOT NULL,
+            input_1_enabled TINYINT NOT NULL,
+            input_1_id INT,
+            input_2_enabled TINYINT NOT NULL,
+            input_2_id INT,
+            input_3_enabled TINYINT NOT NULL,
+            input_3_id INT,
+            input_4_enabled TINYINT NOT NULL,
+            input_4_id INT,
+            input_5_enabled TINYINT NOT NULL,
+            input_5_id INT,
+            FOREIGN KEY(input_1_id) REFERENCES textinputs(input_id),
+            FOREIGN KEY(input_2_id) REFERENCES textinputs(input_id),
+            FOREIGN KEY(input_3_id) REFERENCES textinputs(input_id),
+            FOREIGN KEY(input_4_id) REFERENCES textinputs(input_id),
+            FOREIGN KEY(input_5_id) REFERENCES textinputs(input_id)
+        );`,
+        columns: [
+            { columnName: "modal_id", columnDef: "INT AUTO_INCREMENT" },
+            { columnName: "name", columnDef: "VARCHAR(255) NOT NULL" },
+            { columnName: "input_1_enabled", columnDef: "TINYINT NOT NULL" },
+            { columnName: "input_1_id", columnDef: "INT" },
+            { columnName: "input_2_enabled", columnDef: "TINYINT NOT NULL" },
+            { columnName: "input_2_id", columnDef: "INT" },
+            { columnName: "input_3_enabled", columnDef: "TINYINT NOT NULL" },
+            { columnName: "input_3_id", columnDef: "INT" },
+            { columnName: "input_4_enabled", columnDef: "TINYINT NOT NULL" },
+            { columnName: "input_4_id", columnDef: "INT" },
+            { columnName: "input_5_enabled", columnDef: "TINYINT NOT NULL" },
+            { columnName: "input_5_id", columnDef: "INT" }
+        ],
+        primaryKey: ["modal_id"]
+    },
+    {
+        table: "general",
+        createQuery: `CREATE TABLE general (
+            guild_id BIGINT PRIMARY KEY,
+            staff_role_id BIGINT NOT NULL DEFAULT '0',
+            ticket_lockout_time INT NOT NULL DEFAULT '0'
+        );`,
+        columns: [
+            { columnName: "guild_id", columnDef: "BIGINT PRIMARY KEY" },
+            { columnName: "ticket_lockout_time", columnDef: "INT NOT NULL DEFAULT '0'" },
+            { columnName: "staff_role_id", columnDef: "BIGINT NOT NULL DEFAULT '0'" }
+        ],
+        primaryKey: ['guild_id']
+    },
+    {
+        table: "tickettimer",
+        createQuery: `CREATE TABLE tickettimer (
+            guild_id BIGINT PRIMARY KEY,
+            discord_usr_id BIGINT NOT NULL DEFAULT '0',
+            ticket_cat_id INT NOT NULL DEFAULT '0',
+            last_ticket_time TIMESTAMP
+        );`,
+        columns: [
+            { columnName: "guild_id", columnDef: "BIGINT PRIMARY KEY" },
+            { columnName: "discord_usr_id", columnDef: "BIGINT NOT NULL DEFAULT '0'" },
+            { columnName: "ticket_cat_id", columnDef: "INT NOT NULL DEFAULT '0'" },
+            { columnName: "last_ticket_time", columnDef: "TIMESTAMP" }
+        ],
+        primaryKey: ['guild_id']
+    },
+    {
+        table: "tickettype",
+        createQuery: `CREATE TABLE tickettype (
+            type_id INT PRIMARY KEY AUTO_INCREMENT,
+            enabled TINYINT NOT NULL,
+            name VARCHAR(255) NOT NULL,
+            send_pre_embed TINYINT NOT NULL,
+            pre_embed_id INT,
+            modal_id INT,
+            send_post_embed TINYINT NOT NULL,
+            post_embed_id INT,
+            ticket_recieve_channel VARCHAR(255),
+            ping_staff_role TINYINT NOT NULL,
+            ticket_log_channel VARCHAR(255)
+        );`,
+        columns: [
+            { columnName: "type_id", columnDef: "INT AUTO_INCREMENT PRIMARY KEY" },
+            { columnName: "enabled", columnDef: "TINYINT NOT NULL" },
+            { columnName: "name", columnDef: "VARCHAR(255) NOT NULL" },
+            { columnName: "send_pre_embed", columnDef: "TINYINT NOT NULL" },
+            { columnName: "pre_embed_id", columnDef: "INT" },
+            { columnName: "modal_id", columnDef: "INT" },
+            { columnName: "send_post_embed", columnDef: "TINYINT NOT NULL" },
+            { columnName: "post_embed_id", columnDef: "INT" },
+            { columnName: "ticket_recieve_channel", columnDef: "VARCHAR(255)" },
+            { columnName: "ping_staff_role", columnDef: "TINYINT NOT NULL" },
+            { columnName: "ticket_log_channel", columnDef: "VARCHAR(255)" }
+        ],
+        primaryKey: ["type_id"]
+    },
+];
 
-async function modifyColumn(table, columnName, definition, isPrimaryKey) {
-    const timestamp = Date.now();
-    const tempTable = `${table}_temp_${timestamp}`;
-    const isAutoIncrement = definition.toUpperCase().includes('AUTO_INCREMENT');
-
-    await SQLQuery('SET FOREIGN_KEY_CHECKS=0');
-
-    try {
-        await SQLQuery(`DROP TABLE IF EXISTS ${tempTable}`);
-        const foreignKeys = await getForeignKeys(table);
-
-        if (isAutoIncrement) {
-            await SQLQuery(`CREATE TABLE ${tempTable} LIKE ${table}`);
-            await SQLQuery(`ALTER TABLE ${tempTable} MODIFY COLUMN ${columnName} ${definition}`);
-            await SQLQuery(`INSERT INTO ${tempTable} SELECT * FROM ${table}`);
-        } else if (isPrimaryKey) {
-            await SQLQuery(`CREATE TABLE ${tempTable} LIKE ${table}`);
-            const defWithoutPK = definition.replace(/PRIMARY KEY/i, '').trim();
-            await SQLQuery(`ALTER TABLE ${tempTable} MODIFY COLUMN ${columnName} ${defWithoutPK}`);
-            await SQLQuery(`ALTER TABLE ${tempTable} DROP PRIMARY KEY`);
-            await SQLQuery(`ALTER TABLE ${tempTable} ADD PRIMARY KEY (${columnName})`);
-            await SQLQuery(`INSERT INTO ${tempTable} SELECT * FROM ${table}`);
-        } else {
-            await SQLQuery(`CREATE TABLE ${tempTable} LIKE ${table}`);
-            await SQLQuery(`ALTER TABLE ${tempTable} MODIFY COLUMN ${columnName} ${definition}`);
-            await SQLQuery(`INSERT INTO ${tempTable} SELECT * FROM ${table}`);
-        }
-
-        await SQLQuery(`DROP TABLE ${table}`);
-        await SQLQuery(`RENAME TABLE ${tempTable} TO ${table}`);
-
-        for (const fk of foreignKeys) {
-            await SQLQuery(`
-                ALTER TABLE ${table} 
-                ADD CONSTRAINT ${fk.CONSTRAINT_NAME}
-                FOREIGN KEY (${fk.COLUMN_NAME})
-                REFERENCES ${fk.REFERENCED_TABLE_NAME}(${fk.REFERENCED_COLUMN_NAME})
-                ON DELETE CASCADE
-                ON UPDATE CASCADE
-            `);
-        }
-    } catch (error) {
-        await SQLQuery(`DROP TABLE IF EXISTS ${tempTable}`);
-        throw error;
-    } finally {
-        await SQLQuery('SET FOREIGN_KEY_CHECKS=1');
-    }
-}
-
-function buildColumnDefinition(column) {
-    return `${column.COLUMN_TYPE} ${column.IS_NULLABLE === 'YES' ? '' : 'NOT NULL'} ${column.COLUMN_DEFAULT ? `DEFAULT ${column.COLUMN_DEFAULT}` : ''} ${column.EXTRA}`.trim();
-}
-
-function arrayEquals(a, b) {
-    return Array.isArray(a) && Array.isArray(b) &&
-        a.length === b.length &&
-        a.every((val, index) => val === b[index]);
-}
 async function genDB() {
-    const tableDefinitions = [
-        {
-            table: "embeds",
-            createQuery: `CREATE TABLE embeds (
-                embed_id INT PRIMARY KEY AUTO_INCREMENT,
-                label VARCHAR(255) NOT NULL,
-                description TEXT,
-                preEmbed INT,
-                postEmbed INT
-            );`,
-            columns: {
-                embed_id: "INT AUTO_INCREMENT",
-                label: "VARCHAR(255) NOT NULL",
-                description: "TEXT",
-                preEmbed: "INT",
-                postEmbed: "INT"
-            },
-            primaryKey: ["embed_id"]
-        },
-        {
-            table: "textinputs",
-            createQuery: `CREATE TABLE textinputs (
-                input_id INT PRIMARY KEY AUTO_INCREMENT,
-                name VARCHAR(255) NOT NULL,
-                style INT NOT NULL,
-                required TINYINT(1) NOT NULL,
-                max_length INT
-            );`,
-            columns: {
-                input_id: "INT AUTO_INCREMENT",
-                name: "VARCHAR(255) NOT NULL",
-                style: "INT NOT NULL",
-                required: "TINYINT(1) NOT NULL",
-                max_length: "INT"
-            },
-            primaryKey: ["input_id"]
-        },
-        {
-            table: "modals",
-            createQuery: `CREATE TABLE modals (
-                modal_id INT PRIMARY KEY AUTO_INCREMENT,
-                name VARCHAR(255) NOT NULL,
-                input_1_enabled TINYINT(1) NOT NULL,
-                input_1_id INT,
-                input_2_enabled TINYINT(1) NOT NULL,
-                input_2_id INT,
-                input_3_enabled TINYINT(1) NOT NULL,
-                input_3_id INT,
-                input_4_enabled TINYINT(1) NOT NULL,
-                input_4_id INT,
-                input_5_enabled TINYINT(1) NOT NULL,
-                input_5_id INT,
-                FOREIGN KEY(input_1_id) REFERENCES textinputs(input_id),
-                FOREIGN KEY(input_2_id) REFERENCES textinputs(input_id),
-                FOREIGN KEY(input_3_id) REFERENCES textinputs(input_id),
-                FOREIGN KEY(input_4_id) REFERENCES textinputs(input_id),
-                FOREIGN KEY(input_5_id) REFERENCES textinputs(input_id)
-            );`,
-            columns: {
-                modal_id: "INT AUTO_INCREMENT",
-                name: "VARCHAR(255) NOT NULL",
-                input_1_enabled: "TINYINT(1) NOT NULL",
-                input_1_id: "INT",
-                input_2_enabled: "TINYINT(1) NOT NULL",
-                input_2_id: "INT",
-                input_3_enabled: "TINYINT(1) NOT NULL",
-                input_3_id: "INT",
-                input_4_enabled: "TINYINT(1) NOT NULL",
-                input_4_id: "INT",
-                input_5_enabled: "TINYINT(1) NOT NULL",
-                input_5_id: "INT"
-            },
-            primaryKey: ["modal_id"]
-        },
-        {
-            table: "general",
-            createQuery: `CREATE TABLE general (
-                guild_id BIGINT PRIMARY KEY,
-                staff_role_id BIGINT NOT NULL DEFAULT '0',
-                ticket_lockout_time INT NOT NULL DEFAULT '0'
-            );`,
-            columns: {
-                guild_id: "BIGINT PRIMARY KEY ",
-                ticket_lockout_time: "INT NOT NULL DEFAULT '0'",
-                staff_role_id: "BIGINT NOT NULL DEFAULT '0'"
-            },
-            primaryKey: ['guild_id']
-        },
-        {
-            table: "tickettimer",
-            createQuery: `CREATE TABLE tickettimer (
-                guild_id BIGINT PRIMARY KEY,
-                discord_usr_id BIGINT NOT NULL DEFAULT '0',
-                ticket_cat_id INT NOT NULL DEFAULT '0',
-                last_ticket_time TIMESTAMP
-            );`,
-            columns: {
-                guild_id: "BIGINT PRIMARY KEY ",
-                discord_usr_id: "BIGINT NOT NULL DEFAULT '0'",
-                ticket_cat_id: "INT NOT NULL DEFAULT '0'",
-                last_ticket_time: "TIMESTAMP"
-            },
-            primaryKey: ['guild_id']
-        },
-        {
-            table: "tickettype",
-            createQuery: `CREATE TABLE tickettype (
-                type_id INT PRIMARY KEY AUTO_INCREMENT,
-                enabled TINYINT(1) NOT NULL,
-                name VARCHAR(255) NOT NULL,
-                send_pre_embed TINYINT(1) NOT NULL,
-                pre_embed_id INT,
-                modal_id INT,
-                send_post_embed TINYINT(1) NOT NULL,
-                post_embed_id INT,
-                ticket_recieve_channel VARCHAR(255),
-                ping_staff_role TINYINT(1) NOT NULL,
-                ticket_log_channel VARCHAR(255)
-            );`,
-            columns: {
-                type_id: "INT AUTO_INCREMENT PRIMARY KEY",
-                enabled: "TINYINT(1) NOT NULL",
-                name: "VARCHAR(255) NOT NULL",
-                send_pre_embed: "TINYINT(1) NOT NULL",
-                pre_embed_id: "INT",
-                modal_id: "INT",
-                send_post_embed: "TINYINT(1) NOT NULL",
-                post_embed_id: "INT",
-                ticket_recieve_channel: "VARCHAR(255)",
-                ping_staff_role: "TINYINT(1) NOT NULL",
-                ticket_log_channel: "VARCHAR(255)"
-            },
-            primaryKey: ["type_id"]
-        },
-    ];
-
     try {
+        // For each table definition
         for (const { table, createQuery, columns, primaryKey } of tableDefinitions) {
+            // check if the table exists in the database
             const tableExists = await SQLQuery(`SHOW TABLES LIKE '${table}'`);
-
+            // if it doesn't, create it and move to the next step
             if (tableExists.length === 0) {
                 await SQLQuery(createQuery);
                 continue;
             }
-
-            const existingColumns = await SQLQuery(`
-                SELECT COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT, EXTRA, COLUMN_KEY
-                FROM INFORMATION_SCHEMA.COLUMNS 
-                WHERE TABLE_NAME = ? AND TABLE_SCHEMA = ?`,
-                [table, process.env.DB_NAME]
-            );
-
-            await SQLQuery('START TRANSACTION');
-            try {
-                for (const [columnName, definition] of Object.entries(columns)) {
-                    const existingColumn = existingColumns.find(col => col.COLUMN_NAME === columnName);
-
-                    if (!existingColumn) {
-                        await SQLQuery(`ALTER TABLE ${table} ADD COLUMN ${columnName} ${definition}`);
-                        continue;
-                    }
-
-                    const currentDef = buildColumnDefinition(existingColumn);
-                    if (currentDef.toUpperCase() !== definition.toUpperCase()) {
-                        const isPrimaryKey = primaryKey.includes(columnName);
-                        await modifyColumn(table, columnName, definition, isPrimaryKey);
+            // we need to make sure the columns match up
+            else {
+                // for each column name and it's definition in this table
+                console.log(columns)
+                for (const { columnName, columnDef } of columns) {
+                    const columnExists = await SQLQuery(`SHOW COLUMNS FROM ${table} LIKE '${columnName}'`);
+                    // if the column doesn't exist, add it
+                    if (columnExists.length === 0) {
+                        await SQLQuery(`ALTER TABLE ${table} ADD COLUMN ${columnName} ${columnDef}`);
                     }
                 }
-                await SQLQuery('COMMIT');
-            } catch (error) {
-                await SQLQuery('ROLLBACK');
-                throw error;
             }
         }
     } catch (error) {
