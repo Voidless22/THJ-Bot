@@ -116,7 +116,7 @@ module.exports = {
 
         } catch (error) {
             console.error('Error logging thread:', error);
-            await interaction.editReply({ content: 'An error occurred while trying to log the thread.', ephemeral: true });
+            await interaction.editReply({ content: 'An error occurred while trying to log the thread.Canceling ticket archival and closing. Please use /ticketsetup to set the log channel if you have not already.', ephemeral: true });
         }
     },
 };

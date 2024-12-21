@@ -25,6 +25,7 @@ async function SQLQuery(sql, values) {
 }
 
 const tableDefinitions = [
+    // Embeds
     {
         table: "embeds",
         createQuery: `CREATE TABLE embeds (
@@ -43,6 +44,7 @@ const tableDefinitions = [
         ],
         primaryKey: ["embed_id"]
     },
+    // Text Inputs
     {
         table: "textinputs",
         createQuery: `CREATE TABLE textinputs (
@@ -61,6 +63,7 @@ const tableDefinitions = [
         ],
         primaryKey: ["input_id"]
     },
+    // Modals
     {
         table: "modals",
         createQuery: `CREATE TABLE modals (
@@ -98,6 +101,7 @@ const tableDefinitions = [
         ],
         primaryKey: ["modal_id"]
     },
+    // General
     {
         table: "general",
         createQuery: `CREATE TABLE general (
