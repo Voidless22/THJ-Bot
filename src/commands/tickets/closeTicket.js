@@ -34,7 +34,7 @@ module.exports = {
     structure: new SlashCommandBuilder()
         .setName('closeticket')
         .setDescription('Logs all messages in a thread, including embed text and attachments, and deletes the thread.')
-        .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageMessages),
+        .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageChannels),
 
     run: async (client, interaction) => {
         const thread = interaction.channel;

@@ -4,7 +4,8 @@ module.exports = {
     name: 'ticketsetup',
     structure: new SlashCommandBuilder()
         .setName('ticketsetup')
-        .setDescription('Set up ticket creation and reception.'),
+        .setDescription('Set up ticket creation and reception.')
+        .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageMessages),
 
     run: async (client, interaction, args) => {
         if (!interaction.member.permissions.has([PermissionsBitField.Flags.ManageChannels, PermissionsBitField.Flags.ManageRoles])) {
@@ -54,7 +55,7 @@ module.exports = {
             .setStyle(3);
         const firstRow = new ActionRowBuilder().addComponents([enableCategoryButton, disableCategoryButton, setCategoryChannelButton, sendCreateTicketButton]);
         const secondRow = new ActionRowBuilder().addComponents([enableCategoryPing, disableCategoryPing, previewCategoryButton, SetCategoryLogChannelButton]);
-        const thirdRow = new ActionRowBuilder().addComponents([setGuideRole,setLockoutTime])
+        const thirdRow = new ActionRowBuilder().addComponents([setGuideRole, setLockoutTime])
         await interaction.reply({ components: [firstRow, secondRow, thirdRow] })
     }
 }
